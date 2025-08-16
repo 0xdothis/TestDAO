@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.20;
 
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
 contract TestDao {
     address[] admins;
+    address owner;
 
     enum Status {
         PENDING,
         PASSED,
         REJECTED
+    }
+
+    constructor() {
+        owner = msg.sender;
     }
 
     mapping(address => bool) approvals;
@@ -39,9 +44,20 @@ contract TestDao {
     }
 
     modifier hasJoinedDAO() {
-        require(joinDAO[msg.sender] == true, "You need to join the DAO first");
+        if (joinDAO[msg.sender] == false) {
+            joinDAO[msg.sender] = true;
+        }
 
         _;
+    }
+
+    modifier onlyOnwer() {
+        require(owner == msg.sender, "YOU CANT ADD ADMIN");
+        _;
+    }
+
+    function add_admin(address _admin) external onlyOnwer {
+        admins.push(_admin);
     }
 
     function approveProposal() external {
